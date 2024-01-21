@@ -126,11 +126,12 @@
 <div class="flex flex-col gap-8 items-center w-full justify-center sticky top-12 sm:top-16">
 	<div class="grid grid-cols-3 place-items-center items-center gap-4 sm:gap-8 px-2 sm:w-1/2">
 		<img class="h-full" src="/images/nira.svg" alt="Ericsson" />
-		<img class="h-full" src="/images/coknajs.svg" alt="Microtec" />
 		<img class="h-full" src="/images/korallen.svg" alt="Ericsson" />
+		<img class="h-full" src="/images/coknajs.svg" alt="Microtec" />
 	</div>
 	<div class="px-2 sm:w-1/2 text-center font-medium text-2xl sm:text-3xl">
-		Norra Europas Största <br /> Parallel Saucer Race
+		Norra Europas Största <br /> Parallel Saucer Race <br />
+		4 dagar kvar
 	</div>
 	<div class="grid grid-cols-2 gap-4 w-full px-2 sm:px-0 font-medium sm:w-1/2">
 		<button on:click={openTicketModal} class="btn w-full variant-filled-primary" type="button"

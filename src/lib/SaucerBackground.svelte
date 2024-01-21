@@ -33,12 +33,16 @@
 	let innerWidth: number;
 	let innerHeight: number;
 
+	let lastFrameTime: number;
+	let fpsSpeedFactor = 1;
+
 	$: speed =
-		innerWidth < 500
+		(innerWidth < 500
 			? MIN_SPEED
 			: innerWidth > 1200
 				? MAX_SPEED
-				: MIN_SPEED + (MAX_SPEED - MIN_SPEED) * ((innerWidth - 500) / (1200 - 500));
+				: MIN_SPEED + (MAX_SPEED - MIN_SPEED) * ((innerWidth - 500) / (1200 - 500))) *
+		fpsSpeedFactor;
 
 	let ufos: UFO[] = [];
 	const isUFOOutOfBounds = (ufo: UFO) => {
@@ -57,25 +61,9 @@
 			ufo.x += ufo.vec.x * speed;
 			ufo.y += ufo.vec.y * speed;
 
-			// Check for collisions
-			// for (let i = 0; i < ufos.length; i++) {
 			for (const other of ufos) {
 				if (ufo.id !== other.id && ufo.timeAtLastCollision < Date.now() - 1000) {
 					if (isColliding(ufo, other)) {
-						// Reflect the velocity vectors
-						// ufo.vec.x *= -1;
-						// ufo.vec.y *= -1;
-						// other.vec.x *= -1;
-						// other.vec.y *= -1;
-
-						// // Normalize the vectors
-						// normalizeVector(ufo.vec);
-						// normalizeVector(other.vec);
-
-						// // Add the collided UFO to the list
-						// ufo.collidedWith.push(other.id);
-						// other.collidedWith.push(ufo.id);
-
 						const dx = ufo.x - other.x;
 						const dy = ufo.y - other.y;
 
@@ -206,6 +194,14 @@
 	});
 
 	const animate = () => {
+		const now = performance.now();
+		const delta = now - lastFrameTime;
+		lastFrameTime = now;
+
+		// Calculate the fpsSpeedFactor (60fps is the baseline)
+		const frameRate = 1000 / delta;
+		fpsSpeedFactor = 60 / frameRate;
+
 		ctx.clearRect(0, 0, innerWidth, innerHeight);
 
 		ufos = moveUfos(ufos); // Update and filter UFOs
