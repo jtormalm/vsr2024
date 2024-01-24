@@ -89,7 +89,12 @@
 	class="fixed flex flex-col items-center font-medium text-sm sm:text-base bottom-4 w-full text-center"
 >
 	{#if scrollY < 1500}
-		<span transition:fade={{ easing: cubicInOut, duration: 150 }}> Skrolla ner </span>
+		<span
+			class="animate-pulse text-xl font-bold"
+			transition:fade={{ easing: cubicInOut, duration: 150 }}
+		>
+			Skrolla ner
+		</span>
 	{/if}
 	<span class="flex gap-1 items-center">
 		<Copyright class="w-4" /> Jakob Tormalm - Simon Bonnedahl

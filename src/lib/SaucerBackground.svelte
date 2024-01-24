@@ -138,26 +138,26 @@
 
 		switch (side) {
 			case 0: // left
-				x = -50; // outside left boundary
+				x = -25; // outside left boundary
 				y = Math.random() * innerHeight;
 				vecX = Math.random(); // Only positive X (right direction)
 				vecY = Math.random() * 2 - 1; // Random Y
 				break;
 			case 1: // right
-				x = innerWidth + 50; // outside right boundary
+				x = innerWidth + 25; // outside right boundary
 				y = Math.random() * innerHeight;
 				vecX = -Math.random(); // Only negative X (left direction)
 				vecY = Math.random() * 2 - 1; // Random Y
 				break;
 			case 2: // top
 				x = Math.random() * innerWidth;
-				y = -50; // outside top boundary
+				y = -25; // outside top boundary
 				vecX = Math.random() * 2 - 1; // Random X
 				vecY = Math.random(); // Only positive Y (down direction)
 				break;
 			case 3: // bottom
 				x = Math.random() * innerWidth;
-				y = innerHeight + 50; // outside bottom boundary
+				y = innerHeight + 25; // outside bottom boundary
 				vecX = Math.random() * 2 - 1; // Random X
 				vecY = -Math.random(); // Only negative Y (up direction)
 				break;
@@ -183,12 +183,12 @@
 		image = new Image();
 		image.src = '/images/ufo.png';
 		image.onload = () => {
-			ufos.push(createRandomUFO());
 			animate();
 		};
 
 		addUfoInterval = setInterval(() => {
-			if (ufos.length < MAX_UFOS) {
+			const ufosToAdd = Math.min(MAX_UFOS - ufos.length, 3);
+			for (let i = 0; i < ufosToAdd; i++) {
 				ufos.push(createRandomUFO());
 			}
 		}, RESPAWN_INTERVAL);
