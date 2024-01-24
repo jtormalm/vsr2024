@@ -10,6 +10,8 @@
 	const MAX_UFOS = 12;
 	const RESPAWN_INTERVAL = 2500;
 
+	const MIN_TIME_BETWEEN_COLLISIONS = 500;
+
 	type UFO = {
 		id: number;
 		x: number;
@@ -62,7 +64,10 @@
 			ufo.y += ufo.vec.y * speed;
 
 			for (const other of ufos) {
-				if (ufo.id !== other.id && ufo.timeAtLastCollision < Date.now() - 1000) {
+				if (
+					ufo.id !== other.id &&
+					ufo.timeAtLastCollision < Date.now() - MIN_TIME_BETWEEN_COLLISIONS
+				) {
 					if (isColliding(ufo, other)) {
 						const dx = ufo.x - other.x;
 						const dy = ufo.y - other.y;
@@ -238,7 +243,10 @@
 			const distance = Math.sqrt(dx * dx + dy * dy);
 
 			const radiusSum = ufoWidth / 2;
-			if (distance < radiusSum * 2 && ufo.timeAtLastCollision < Date.now() - 1000) {
+			if (
+				distance < radiusSum * 2 &&
+				ufo.timeAtLastCollision < Date.now() - MIN_TIME_BETWEEN_COLLISIONS
+			) {
 				// Use the mouse movement vector to change the UFO's direction
 				ufo.vec.x += vec.x;
 				ufo.vec.y += vec.y;

@@ -76,6 +76,11 @@
 	};
 </script>
 
+<!-- set the page title to Valla Saucer Rennen 2024 -->
+<svelte:head>
+	<title>Valla Saucer Rennen 2024</title>
+</svelte:head>
+
 <svelte:window bind:scrollY bind:innerWidth bind:innerHeight />
 
 <SaucerBackground />
@@ -137,7 +142,7 @@
 
 <div class="h-[5400px] flex justify-center"></div>
 
-<div class="flex flex-col gap-6 items-center w-full justify-center sticky top-12 sm:top-16">
+<div class="flex flex-col gap-4 items-center w-full justify-center sticky top-12 sm:top-12">
 	<div class="grid grid-cols-3 place-items-center items-center gap-4 sm:gap-8 px-2 sm:w-1/2">
 		<img src="/images/nira.svg" alt="Ericsson" />
 		<img src="/images/korallen.svg" alt="Ericsson" />
@@ -172,7 +177,7 @@
 			disabled>Öppna Tävling</button
 		>
 	</div>
-	<div class="flex justify-center w-40 sm:w-48 2xl:w-64">
+	<div class="flex justify-center w-40">
 		<img class="" src="/images/y6.png" alt="YSex Logo" />
 	</div>
 </div>
