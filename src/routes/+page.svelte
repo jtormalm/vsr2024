@@ -18,7 +18,7 @@
 	let innerHeight: number;
 	let loaded = false;
 
-	let targetDate = new Date('2024-02-01T10:00:00');
+	let targetDate = new Date('2024-02-03T10:00:00');
 
 	const textSizeBase = 180;
 	let initialScale = 1;
