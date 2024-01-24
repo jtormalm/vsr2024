@@ -22,6 +22,7 @@
     "@tailwindcss/typography": "0.5.10",
     "@types/eslint": "8.56.0",
     "@types/node": "20.11.2",
+    "@types/react": "^18.2.48",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
     "autoprefixer": "10.4.16",
@@ -42,7 +43,13 @@
   "type": "module",
   "dependencies": {
     "@floating-ui/dom": "1.5.4",
+    "@g-loot/react-tournament-brackets": "1.0.31-rc",
+    "@uidotdev/usehooks": "^2.4.1",
     "highlight.js": "11.9.0",
-    "lucide-svelte": "^0.314.0"
+    "lucide-svelte": "^0.314.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "styled-components": "^6.1.8",
+    "svelte-preprocess-react": "^0.16.0"
   }
 }
