@@ -23,9 +23,14 @@
 	const textSizeBase = 180;
 	let initialScale = 1;
 	onMount(() => {
-		initialScale = 0.75 * (innerWidth / textSizeBase);
 		loaded = true;
 	});
+
+	$: {
+		if (loaded) {
+			initialScale = 0.75 * (innerWidth / textSizeBase);
+		}
+	}
 
 	let clock: HTMLDivElement;
 	let clockOpacity = 0;
