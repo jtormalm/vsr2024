@@ -9,7 +9,7 @@
 
 	import { getModalStore } from '@skeletonlabs/skeleton';
 	import { cubicInOut } from 'svelte/easing';
-	import { Copyright } from 'lucide-svelte';
+	// import { Copyright } from 'lucide-svelte';
 
 	const modalStore = getModalStore();
 
@@ -102,7 +102,10 @@
 		</span>
 	{/if}
 	<span class="flex gap-1 items-center">
-		<Copyright class="w-4" /> Jakob Tormalm - Simon Bonnedahl
+		<!-- <Copyright class="w-4" />  -->
+		
+		<img class="w-4 " src="/images/copyright.svg" alt="CopyRight Symbol">
+		Jakob Tormalm - Simon Bonnedahl
 	</span>
 </div>
 
