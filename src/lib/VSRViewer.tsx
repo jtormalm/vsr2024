@@ -26,7 +26,7 @@ const vsrTheme = createTheme({
     highlightedColor: '#262626', // color_secondary_400
   },
   roundHeader: { 
-    background: '#ffffff', // color_secondary_400
+    backgroundColor: '#000000', // color_secondary_400
     fontColor: '#ffffff', // theme_font_color_base
   },
   connectorColor: '#222222', // color_primary_800
@@ -49,8 +49,10 @@ export const VSRViewer: React.FC<VSRViewerProps> = ({ matches, width, height }) 
       options={{
         style: {
           roundHeader: {
-            background: vsrTheme.roundHeader.backgroundColor,
+            isShown: true,
+            backgroundColor: "#000000",
             fontColor: vsrTheme.roundHeader.fontColor,
+            fontFamily: 'Space',
           },
           connectorColor: vsrTheme.connectorColor,
           connectorColorHighlight: vsrTheme.connectorColorHighlight,

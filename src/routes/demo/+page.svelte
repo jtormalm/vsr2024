@@ -17,7 +17,7 @@
 		loaded = true;
 	});
 
-	let selected = 'kvalet';
+	let selected = 'vsr';
 
 	let textHeight = 0;
 	let radioHeight = 0;
