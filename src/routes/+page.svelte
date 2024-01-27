@@ -185,9 +185,10 @@
 		>
 	</div>
 	<div class="w-full px-2 sm:px-0 sm:w-1/2">
-		<button
-			class="btn variant-glass-primary text-center w-full text-2xl sm:text-3xl font-bold"
-			disabled>Öppna Tävling</button
+		<a
+			href="/tavling"
+			class="btn variant-filled-primary text-center w-full text-2xl sm:text-3xl font-bold"
+			>Öppna Tävling</a
 		>
 	</div>
 	<div class="flex justify-center w-40">
