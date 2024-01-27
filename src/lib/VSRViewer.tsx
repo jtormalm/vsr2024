@@ -1,5 +1,6 @@
 import React from 'react';
-import { SingleEliminationBracket, Match, SVGViewer, createTheme    } from '@g-loot/react-tournament-brackets';
+import { SingleEliminationBracket, Match, createTheme    } from '@g-loot/react-tournament-brackets';
+import SvgViewer  from './SVGViewer';
 
 const vsrTheme = createTheme({
   textColor: { 
@@ -59,7 +60,7 @@ export const VSRViewer: React.FC<VSRViewerProps> = ({ matches, width, height }) 
         },
       }}
       svgWrapper={({ children, ...props }) => (
-        <SVGViewer
+        <SvgViewer
         background={vsrTheme.svgBackground}
         customMiniature={() => null}
         SVGBackground={vsrTheme.svgBackground}
@@ -68,7 +69,7 @@ export const VSRViewer: React.FC<VSRViewerProps> = ({ matches, width, height }) 
           {...props}
         >
           {children}
-        </SVGViewer>
+        </SvgViewer>
       )}
       matchComponent={({
         match,
@@ -112,12 +113,12 @@ export const VSRViewer: React.FC<VSRViewerProps> = ({ matches, width, height }) 
     onMouseEnter={() => onMouseEnter(topParty.id)}
     style={{ 
       display: 'flex',
-      color: topWon ? '#e3d647' : (bottomWon ? '#676767' : ''),
+      color: topParty.name === "TBD" ? '#676767' : (topWon ? '#e3d647' : (bottomWon ? '#676767' : '')),
       paddingBottom: '14px',
       paddingTop: '14px',
     }}
   >
-    <div style={{ width: '100%', paddingLeft: "8px"}}>
+    <div style={{ width: '100%', paddingLeft: "8px", }}>
       {topParty.name.slice(0,16)}
     </div>
     <div style={{ paddingRight: '8px' }}>
@@ -139,7 +140,12 @@ export const VSRViewer: React.FC<VSRViewerProps> = ({ matches, width, height }) 
       display: 'flex',
       
       justifyContent: 'space-between',
-      color: bottomWon ? '#e3d647' : (topWon ? '#676767' : ''),
+      color: bottomParty.name === "TBD" ? '#676767' : (bottomWon ? '#e3d647' : (topWon ? '#676767' : '')),
+
+
+
+
+
       paddingBottom: '12px',
       paddingTop: '12px',
     }}

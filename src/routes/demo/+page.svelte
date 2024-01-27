@@ -5,6 +5,8 @@
 	import { RadioGroup, RadioItem } from '@skeletonlabs/skeleton';
 	import { onMount } from 'svelte';
 
+	export let data;
+
 	let innerHeight: number;
 	let innerWidth: number;
 
@@ -22,40 +24,41 @@
 	let textHeight = 0;
 	let radioHeight = 0;
 
-	const teams = [
-		'Amors Pilar',
-		'Bönder N Brothers',
-		'D-sek LTH 1',
-		'D-sek LTH 2',
-		'D-sek LTH 3',
-		'Dart, fast man kan dö',
-		'Hepatet D (A-lag)',
-		'Hepatet D (B-lag)',
-		'Inre Frid',
-		'Myselsen',
-		'Norra Solbergas eminenta herrförening',
-		'Null Pointers',
-		'Orumakers',
-		'Team Gamnacke',
-		'UU miljöaktivister',
-		'D-Dagen',
-		'CLWankers',
-		'DKM',
-		'KTHockey',
-		'BeDÖMDt',
-		'BrödKaka',
-		'Dedart6',
-		'Kollektiveriet',
-		'Eilerts Pilarmar',
-		'Fart',
-		'Makers',
-		'Fru under 18 söks åt Mehmet',
-		'Wendin ska bli gulad',
-		'Datasimparna',
-		'SMurfarna',
-		'PIL-verkeriet',
-		'Innovativt Pilskande'
-	];
+	const getPlayerNameById = (id: number | null): string | null => {
+		if (id === null) return null;
+		const player = data.players.find((player) => player.id === id);
+		return player ? player.name : null;
+	};
+
+	const result = data.matches.map((match) => ({
+		id: match.id,
+		name: match.name,
+		nextMatchId: match.next_match_id,
+		nextLooserMatchId: null, // Assuming there's no direct mapping for this
+		tournamentRoundText: match.round.toString(),
+		startTime: match.created_at,
+		state: match.winner === 'NONE' ? 'SCHEDULED' : 'FINISHED',
+		participants: [
+			match.p1 !== null
+				? {
+						id: match.p1.toString(),
+						resultText: null,
+						isWinner: match.winner === 'P1',
+						status: null,
+						name: getPlayerNameById(match.p1)
+					}
+				: null,
+			match.p2 !== null
+				? {
+						id: match.p2.toString(),
+						resultText: null,
+						isWinner: match.winner === 'P2',
+						status: null,
+						name: getPlayerNameById(match.p2)
+					}
+				: null
+		].filter((participant) => participant !== null) // Filter out null participants
+	}));
 </script>
 
 <svelte:window bind:innerHeight bind:innerWidth />
@@ -94,7 +97,7 @@
 		>
 			{#if loaded}
 				<react:VSRViewer
-					{matches}
+					matches={result}
 					width={innerWidth}
 					height={innerHeight - radioHeight - textHeight - 48 - 32}
 				/>
@@ -102,14 +105,14 @@
 		</div>
 	{:else}
 		<div class="h-full grid grid-cols-2 mb- sm:grid-cols-4 gap-4 sm:gap-8 overflow-y-scroll">
-			{#each teams as team}
-				<div class="rounded-lg w-full flex flex-col border-2 border-surface-600">
+			{#each data.players.sort((a, b) => a.id - b.id) as player}
+				<div class="rounded-lg min-w-40 w-full flex flex-col border-2 border-surface-600">
 					<div class="text-primary-500 p-2 font-bold">
-						{team}
+						{player.name}
 					</div>
 					<hr />
 					<div class="text-surface-300 p-2">
-						{Math.round(Math.random() * 100000) / 1000}s
+						{player.best_time}s
 					</div>
 				</div>
 			{/each}

@@ -103,8 +103,8 @@
 	{/if}
 	<span class="flex gap-1 items-center">
 		<!-- <Copyright class="w-4" />  -->
-		
-		<img class="w-4 " src="/images/copyright.svg" alt="CopyRight Symbol">
+
+		<img class="w-4" src="/images/copyright.svg" alt="CopyRight Symbol" />
 		Jakob Tormalm - Simon Bonnedahl
 	</span>
 </div>

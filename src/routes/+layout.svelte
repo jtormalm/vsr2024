@@ -4,14 +4,33 @@
 	// Highlight JS
 	import hljs from 'highlight.js/lib/core';
 	import 'highlight.js/styles/github-dark.css';
-	import { Modal, storeHighlightJs, type ModalComponent } from '@skeletonlabs/skeleton';
+	import { Modal, storeHighlightJs, type ModalComponent, Toast } from '@skeletonlabs/skeleton';
 	import xml from 'highlight.js/lib/languages/xml'; // for HTML
 	import css from 'highlight.js/lib/languages/css';
 	import javascript from 'highlight.js/lib/languages/javascript';
 	import typescript from 'highlight.js/lib/languages/typescript';
 
-	import { initializeStores } from '@skeletonlabs/skeleton';
+	import { invalidate } from '$app/navigation';
+	import { onMount } from 'svelte';
 
+	export let data;
+
+	let { supabase, session } = data;
+	$: ({ supabase, session } = data);
+
+	onMount(() => {
+		const {
+			data: { subscription }
+		} = supabase.auth.onAuthStateChange((event, _session) => {
+			if (_session?.expires_at !== session?.expires_at) {
+				invalidate('supabase:auth');
+			}
+		});
+
+		return () => subscription.unsubscribe();
+	});
+
+	import { initializeStores } from '@skeletonlabs/skeleton';
 	import DayModal from '$lib/DayModal.svelte';
 
 	initializeStores();
@@ -34,5 +53,6 @@
 	};
 </script>
 
+<Toast position="br" />
 <Modal components={modalRegistry} />
 <slot />
