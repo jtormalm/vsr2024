@@ -45,7 +45,7 @@
 			match.p1 !== null
 				? {
 						id: match.p1.toString(),
-						resultText: null,
+						resultText: match.winner !== 'NONE' ? (match.winner === 'P1' ? 'W' : 'L') : null,
 						isWinner: match.winner === 'P1',
 						status: null,
 						name: getPlayerNameById(match.p1)
@@ -54,7 +54,7 @@
 			match.p2 !== null
 				? {
 						id: match.p2.toString(),
-						resultText: null,
+						resultText: match.winner !== 'NONE' ? (match.winner === 'P2' ? 'W' : 'L') : null,
 						isWinner: match.winner === 'P2',
 						status: null,
 						name: getPlayerNameById(match.p2)
@@ -191,8 +191,10 @@
 		</div>
 	{:else}
 		<div class="h-full grid grid-cols-2 mb- sm:grid-cols-4 gap-4 sm:gap-8 overflow-y-scroll">
-			{#each data.players.sort((a, b) => a.id - b.id) as player}
-				<div class="rounded-lg min-w-40 w-full flex flex-col border-2 border-surface-600">
+			{#each data.players.sort((a, b) => (a.best_time ?? 0) - (b.best_time ?? 0)) as player}
+				<div
+					class="rounded-lg min-w-40 w-full flex flex-col border-2 border-surface-600 brightness-100"
+				>
 					<div class="text-primary-500 p-2 font-bold">
 						{player.name}
 					</div>

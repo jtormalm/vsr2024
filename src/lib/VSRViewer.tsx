@@ -35,6 +35,13 @@ const vsrTheme = createTheme({
   svgBackground: '#131313', // color_surface_500
 });
 
+// const event = new CustomEvent('yourCustomEvent', {
+//   detail: {
+//     test: 'test',
+//   }
+// });
+
+
 
 interface VSRViewerProps {
   matches: unknown[];
@@ -43,10 +50,31 @@ interface VSRViewerProps {
 }
 
 export const VSRViewer: React.FC<VSRViewerProps> = ({ matches, width, height }) => {
+
+  const emitPartyClick = (playerId: number, matchId: number) => {
+    const event = new CustomEvent('partyClick', {
+      detail: {
+        partyId: playerId,
+        matchId,
+      }
+    });
+    window.dispatchEvent(event);
+  }
+
+
   return (
     <SingleEliminationBracket
       matches={matches}
       theme={vsrTheme}
+      onMatchClick={(matchId: number) => {
+        const event = new CustomEvent('matchClick', {
+          detail: {
+            matchId,
+          }
+        });
+        window.dispatchEvent(event);
+      }
+      }
       options={{
         style: {
           roundHeader: {
@@ -90,7 +118,6 @@ export const VSRViewer: React.FC<VSRViewerProps> = ({ matches, width, height }) 
         teamNameFallback,
         resultFallback,
       }) => (
-        
         <div>
 
 <div
@@ -106,6 +133,8 @@ export const VSRViewer: React.FC<VSRViewerProps> = ({ matches, width, height }) 
     borderRadius: '4px',
     fontWeight: '500',
   }}
+  id={match.id}
+  // onClick={() => onMatchClick(match.id)}
 >
 
  
@@ -138,14 +167,8 @@ export const VSRViewer: React.FC<VSRViewerProps> = ({ matches, width, height }) 
     onMouseEnter={() => onMouseEnter(bottomParty.id)}
     style={{ 
       display: 'flex',
-      
       justifyContent: 'space-between',
       color: bottomParty.name === "TBD" ? '#676767' : (bottomWon ? '#e3d647' : (topWon ? '#676767' : '')),
-
-
-
-
-
       paddingBottom: '12px',
       paddingTop: '12px',
     }}

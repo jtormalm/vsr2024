@@ -1,5 +1,11 @@
 <script lang="ts">
-	import { RadioGroup, RadioItem, type ToastSettings } from '@skeletonlabs/skeleton';
+	import {
+		RadioGroup,
+		RadioItem,
+		type ConicStop,
+		type ToastSettings,
+		ConicGradient
+	} from '@skeletonlabs/skeleton';
 	import { getToastStore } from '@skeletonlabs/skeleton';
 
 	export let data;
@@ -14,6 +20,9 @@
 	$: console.log(data);
 
 	const submitChanges = async (player: (typeof data.players)[number]) => {
+		if (requestActive) return;
+		requestActive = true;
+
 		const { data, error } = await supabase.from('player').update(player).eq('id', player.id);
 
 		if (error) {
@@ -22,13 +31,14 @@
 				background: 'variant-filled-warning'
 			};
 			toastStore.trigger(t);
+		} else {
+			const t = {
+				message: 'Ändringar sparade',
+				background: 'variant-filled-primary'
+			};
+			toastStore.trigger(t);
 		}
-
-		const t = {
-			message: 'Ändringar sparade',
-			background: 'variant-filled-primary'
-		};
-		toastStore.trigger(t);
+		await disableRequest();
 	};
 
 	const createFirstRound = async () => {
@@ -36,6 +46,9 @@
 		const confirmMessage =
 			'Är du säker på att du vill skapa första rundan? Alla tidigare resultat kommer att raderas';
 		if (!confirm(confirmMessage)) return;
+
+		if (requestActive) return;
+		requestActive = true;
 
 		const { error } = await supabase
 			.from('match')
@@ -49,6 +62,7 @@
 				background: 'variant-filled-warning'
 			};
 			toastStore.trigger(t);
+			await disableRequest();
 
 			return;
 		}
@@ -65,23 +79,33 @@
 		}
 
 		// Update the match table with the pairs
-		for (let i = 0; i < pairs.length; i++) {
+		const updatePromises = pairs.map((pair, i) => {
 			const matchId = i + 1; // Assuming match IDs are 1-indexed
-			const { faster, slower } = pairs[i];
+			const { faster, slower } = pair;
 
-			const { data: updateData, error } = await data.supabase
+			return data.supabase
 				.from('match')
 				.update({ p1: faster, p2: slower, winner: 'NONE' })
-				.eq('id', matchId);
+				.eq('id', matchId)
+				.then(({ data: updateData, error }) => {
+					if (error) {
+						const t = {
+							message: `Problem med match ${matchId}: ${error.message} Kontakta oss`,
+							background: 'variant-filled-warning'
+						};
+						toastStore.trigger(t);
+						throw new Error(`Error updating match ${matchId}`);
+					}
+					return updateData; // or whatever you want to return
+				});
+		});
 
-			if (error) {
-				const t = {
-					message: `Problem med match ${matchId}: ${error.message} Kontakta oss`,
-					background: 'variant-filled-warning'
-				};
-				toastStore.trigger(t);
-				return;
-			}
+		try {
+			const results = await Promise.all(updatePromises);
+			// Process results if necessary
+		} catch (error) {
+			await disableRequest();
+			// Handle error, maybe already handled in the mapping function
 		}
 
 		const t = {
@@ -89,6 +113,7 @@
 			background: 'variant-filled-primary'
 		};
 		toastStore.trigger(t);
+		await disableRequest();
 	};
 
 	const getUser = (userId: number) => {
@@ -108,11 +133,14 @@
 		toastStore.trigger(t);
 	};
 
-	let winnerId: number;
-
 	$: currentMatch = data.matches.find((m) => m.id === selectedMatch) ?? data.matches[0];
 
+	let requestActive = false;
+
+	let winnerId: number;
 	const setWinner = async (matchId: number, winnerId: number) => {
+		if (requestActive) return;
+		requestActive = true;
 		const match = getMatch(matchId);
 		if (!match) return;
 		const winner = match.p1 === winnerId ? 'P1' : 'P2';
@@ -121,6 +149,7 @@
 
 		if (error) {
 			printError(error);
+			await disableRequest();
 			return;
 		}
 
@@ -139,6 +168,7 @@
 				.eq('id', nextMatch.id);
 			if (error) {
 				printError(error);
+				await disableRequest();
 				return;
 			} else {
 				nextMatch[otherWinner.toLowerCase()] = winnerId;
@@ -150,11 +180,15 @@
 			background: 'variant-filled-primary'
 		};
 		toastStore.trigger(t);
+		await disableRequest();
 	};
 
 	const clearData = async () => {
 		const confirmMessage = 'Är du säker på att du vill rensa alla matcher?';
 		if (!confirm(confirmMessage)) return;
+
+		if (requestActive) return;
+		requestActive = true;
 
 		const { error } = await supabase
 			.from('match')
@@ -168,7 +202,7 @@
 				background: 'variant-filled-warning'
 			};
 			toastStore.trigger(t);
-
+			await disableRequest();
 			return;
 		}
 
@@ -177,7 +211,18 @@
 			background: 'variant-filled-primary'
 		};
 		toastStore.trigger(t);
+		await disableRequest();
 	};
+
+	const disableRequest = async () => {
+		await new Promise((resolve) => setTimeout(resolve, 500));
+		requestActive = false;
+	};
+
+	const conicStops: ConicStop[] = [
+		{ color: 'transparent', start: 0, end: 25 },
+		{ color: '#ffffff', start: 75, end: 100 }
+	];
 </script>
 
 <svelte:head>
@@ -187,15 +232,17 @@
 <div class="flex sm:p-4 p-2 w-screen text-white flex-col justify-center items-center">
 	<div class="w-full text-center z-20 mt-4 mb-4 text-xl sm:text-2xl font-bold">VSR Admin</div>
 	<div class="mb-4">
-		<RadioGroup class="font-medium">
+		<RadioGroup disabled class="font-medium">
 			<RadioItem
-				active="text-black bg-primary-400"
+				disabled={requestActive}
+				active="text-black bg-primary-400 "
 				class="px-8"
 				bind:group={selected}
 				name="justify"
 				value={'kvalet'}>Kvalet</RadioItem
 			>
 			<RadioItem
+				disabled={requestActive}
 				active="text-black bg-primary-400"
 				class="px-8"
 				bind:group={selected}
@@ -206,12 +253,15 @@
 	</div>
 
 	{#if selected === 'vsr'}
-		<button on:click={clearData} class="btn m-4 mt-0 variant-filled-primary" type="button"
-			>Rensa alla matcher</button
+		<button
+			disabled={requestActive}
+			on:click={clearData}
+			class="btn m-4 mt-0 variant-filled-primary"
+			type="button">Rensa alla matcher</button
 		>
 		<label class="label">
 			<span>Match</span>
-			<select bind:value={selectedMatch} class="select">
+			<select disabled={requestActive} bind:value={selectedMatch} class="select">
 				{#each data.matches.sort((a, b) => a.id - b.id) as match}
 					<option value={match.id}>{match.name}</option>
 				{/each}
@@ -248,14 +298,17 @@
 				<button
 					on:click={() => setWinner(currentMatch.id, winnerId)}
 					class="btn w-full variant-filled-primary"
-					disabled={!currentMatch.p1 || !currentMatch.p2}
+					disabled={!currentMatch.p1 || !currentMatch.p2 || requestActive || !winnerId}
 					type="button">Spara Vinnare</button
 				>
 			</div>
 		</div>
 	{:else}
-		<button on:click={createFirstRound} class="btn m-4 mt-0 variant-filled-primary" type="button"
-			>Skapa första rundan i VSR</button
+		<button
+			disabled={requestActive}
+			on:click={createFirstRound}
+			class="btn m-4 mt-0 variant-filled-primary"
+			type="button">Skapa första rundan i VSR</button
 		>
 		<div class="h-full grid grid-cols-2 mb- sm:grid-cols-4 gap-4 sm:gap-8 overflow-y-scroll">
 			{#each data.players.sort((a, b) => a.id - b.id) as player}
@@ -278,10 +331,17 @@
 						/>
 					</label>
 					<button
+						disabled={requestActive}
 						on:click={() => submitChanges(player)}
-						class="btn variant-filled-primary"
-						type="button">Spara Ändringar</button
+						class="btn variant-filled-primary w-64"
+						type="button"
 					>
+						{#if requestActive}
+							Laddar...
+						{:else}
+							Spara Ändringar
+						{/if}
+					</button>
 				</div>
 			{/each}
 		</div>
