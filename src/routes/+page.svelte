@@ -121,9 +121,9 @@
 	<div class="fixed inset-0 overflow-hidden">
 		<div class="absolute top-1/2 left-1/2">
 			<div
-				style="transform: translate(-50%, -50%) scale({scrollY > 500
-					? 2 ** ((scrollY - 500) / 200) + initialScale - 1
-					: initialScale}); 
+				style="transform: translate(-50%, -50%) scale({2 ** ((scrollY - 500) / 200) +
+					initialScale -
+					1}); 
                 filter: brightness({Math.min(100, 40 + 0.12 * scrollY)}%);"
 				class="transform-gpu select-none text-center font-bold"
 			>
