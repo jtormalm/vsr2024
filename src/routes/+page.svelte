@@ -166,28 +166,30 @@
 		<span class="font-bold"> {daysLeft} dagar kvar </span>
 	</div>
 	<div class="grid grid-cols-2 gap-4 w-full px-2 sm:px-0 font-bold sm:w-1/2">
-		<button on:click={openTicketModal} class="btn w-full variant-filled-primary" type="button"
+		<button on:click={openTicketModal} class="btn w-full variant-outline-primary" type="button"
 			>Biljettsläpp</button
 		>
-		<button on:click={() => openDayModal(0)} class="btn w-full variant-filled-primary" type="button"
-			>Onsdag</button
+		<button
+			on:click={() => openDayModal(0)}
+			class="btn w-full variant-outline-primary"
+			type="button">Onsdag</button
 		>
-		<button on:click={() => openDayModal(1)} class="btn w-full variant-filled-primary" type="button"
-			>Torsdag</button
+		<button
+			on:click={() => openDayModal(1)}
+			class="btn w-full variant-outline-primary"
+			type="button">Torsdag</button
 		>
-		<button on:click={() => openDayModal(2)} class="btn w-full variant-filled-primary" type="button"
-			>Fredag</button
+		<button
+			on:click={() => openDayModal(2)}
+			class="btn w-full variant-outline-primary"
+			type="button">Fredag</button
 		>
 		<button
 			on:click={() => openDayModal(3)}
-			class="btn w-full col-span-2 variant-filled-primary"
-			type="button">LÖRDAG</button
+			class="btn w-full variant-outline-primary"
+			type="button">Lördag</button
 		>
-	</div>
-	<div class="w-full px-2 sm:px-0 sm:w-1/2">
-		<a
-			href="/tavling"
-			class="btn variant-filled-primary text-center w-full text-2xl sm:text-3xl font-bold"
+		<a href="/tavling" class="btn variant-filled-primary text-center w-full font-bold"
 			>Öppna Tävling</a
 		>
 	</div>

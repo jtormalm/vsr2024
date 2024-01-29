@@ -7,7 +7,7 @@ export const wednesday: EventDay = [
     export const thursday: EventDay = [
         { time: "08:00", text: "The Red Keep i Baljan - Kaffe och utlottning av biljetter och priser." },
         { time: "14:00", text: "Torsdagskröken - Öl för studenter från kl 14, med VSR öl i kröken." },
-        { time: "22:00", text: "Türrolleröjet i Kårallen - Forte! spelar, Reyn uppträder kl 01:00. Premiär för VSR-burgare, VSR öl tillgängligt." },
+        { time: "22:00", text: "Türrolleröjet i Kårallen - Forte! spelar, Reyn uppträder kl 00:30. Premiär för VSR-burgare, VSR öl tillgängligt." },
     ];
     
 
