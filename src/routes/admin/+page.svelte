@@ -192,7 +192,7 @@
 
 		const { error } = await supabase
 			.from('match')
-			.update({ p1: null, p2: null, winner: 'NONE' })
+			.update({ p1: null, p2: null, winner: 'NONE', start_time: null })
 			.gt('id', 0);
 
 		if (error) {
@@ -219,10 +219,65 @@
 		requestActive = false;
 	};
 
-	const conicStops: ConicStop[] = [
-		{ color: 'transparent', start: 0, end: 25 },
-		{ color: '#ffffff', start: 75, end: 100 }
-	];
+	const setStartTime = async (matchId: number) => {
+		if (requestActive) return;
+		requestActive = true;
+
+		const { error } = await supabase
+			.from('match')
+			.update({ start_time: currentMatch.start_time })
+			.eq('id', matchId);
+
+		if (error) {
+			printError(error);
+			await disableRequest();
+			return;
+		}
+
+		const t = {
+			message: 'Starttid sparad',
+			background: 'variant-filled-primary'
+		};
+		toastStore.trigger(t);
+		await disableRequest();
+	};
+
+	data.supabase
+		.channel('player')
+		.on(
+			'postgres_changes',
+			{
+				event: '*',
+				schema: 'public'
+			},
+			async (payload) => {
+				if (payload.eventType != 'UPDATE') return;
+
+				const { data: players } = await data.supabase.from('player').select('*');
+				data.players = players ?? [];
+			}
+		)
+		.subscribe();
+
+	// do the same but for matches
+	data.supabase
+		.channel('match')
+		.on(
+			'postgres_changes',
+			{
+				event: '*',
+				schema: 'public'
+			},
+			async (payload) => {
+				const { data: matches } = await data.supabase.from('match').select('*');
+				data.matches = matches ?? [];
+			}
+		)
+		.subscribe();
+
+	// let playerStartTimes: [string, string][];
+
+	// $: playerStartTimes = data.players.map((p) => [p.id.toString(), p.start_time ?? '00:00'])
 </script>
 
 <svelte:head>
@@ -297,9 +352,25 @@
 				{/if}
 				<button
 					on:click={() => setWinner(currentMatch.id, winnerId)}
-					class="btn w-full variant-filled-primary"
+					class="btn w-full !mb-4 variant-filled-primary"
 					disabled={!currentMatch.p1 || !currentMatch.p2 || requestActive || !winnerId}
 					type="button">Spara Vinnare</button
+				>
+
+				<label class="label">
+					<input
+						class="input"
+						type="text"
+						placeholder="Starttid"
+						bind:value={currentMatch.start_time}
+					/>
+				</label>
+
+				<button
+					on:click={() => setStartTime(currentMatch.id)}
+					class="btn w-full variant-filled-primary"
+					disabled={requestActive}
+					type="button">Spara Starttid</button
 				>
 			</div>
 		</div>
@@ -324,12 +395,38 @@
 
 					<label class="label">
 						<input
+							maxlength="5"
+							class="input"
+							type="text"
+							placeholder="Starttid"
+							bind:value={player.start_time}
+						/>
+					</label>
+					<!-- {@const a = console.log(player)} -->
+
+					<label class="label">
+						<input
 							class="input"
 							type="number"
 							placeholder="Bästa Tid"
 							bind:value={player.best_time}
 						/>
 					</label>
+					<!-- <div class="w-full items-center flex gap-1">
+						<select class="select" value={player.start_time?.split(':')[0] ?? '0'}>
+							{#each Array.from(Array(24).keys()) as hour}
+								{@const formatted = hour.toString().padStart(2, '0')}
+								<option value={formatted}>{formatted}</option>
+							{/each}
+						</select>
+						<span> : </span>
+						<select class="select" value={player.start_time?.split(':')[1] ?? '0'}>
+							{#each Array.from(Array(60).keys()) as minute}
+								{@const formatted = minute.toString().padStart(2, '0')}
+								<option value={formatted}>{formatted}</option>
+							{/each}
+						</select>
+					</div> -->
 					<button
 						disabled={requestActive}
 						on:click={() => submitChanges(player)}

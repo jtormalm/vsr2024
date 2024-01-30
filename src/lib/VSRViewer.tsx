@@ -119,7 +119,15 @@ export const VSRViewer: React.FC<VSRViewerProps> = ({ matches, width, height }) 
         resultFallback,
       }) => (
         <div>
+          <span
+          style={{
+            marginBottom: '2px',
+            marginLeft: '2px',
+          }}
+          >
 
+        {topText ?? ""}
+          </span>
 <div
   style={{
     display: 'flex',
@@ -143,12 +151,14 @@ export const VSRViewer: React.FC<VSRViewerProps> = ({ matches, width, height }) 
     style={{ 
       display: 'flex',
       color: topParty.name === "TBD" ? '#676767' : (topWon ? '#e3d647' : (bottomWon ? '#676767' : '')),
-      paddingBottom: '14px',
-      paddingTop: '14px',
+      paddingBottom: '8px',
+      paddingTop: '8px',
     }}
   >
     <div style={{ width: '100%', paddingLeft: "8px", }}>
-      {topParty.name.slice(0,16)}
+      
+      {topParty.name.slice(0,20)} 
+      {topParty.name.length > 20 ? '...' : ''}
     </div>
     <div style={{ paddingRight: '8px' }}>
       {topParty.resultText ?? resultFallback(topParty)}
@@ -169,12 +179,14 @@ export const VSRViewer: React.FC<VSRViewerProps> = ({ matches, width, height }) 
       display: 'flex',
       justifyContent: 'space-between',
       color: bottomParty.name === "TBD" ? '#676767' : (bottomWon ? '#e3d647' : (topWon ? '#676767' : '')),
-      paddingBottom: '12px',
-      paddingTop: '12px',
+      paddingBottom: '7px',
+      paddingTop: '7px',
     }}
   >
     <div style={{ paddingLeft: "8px" }}>
-      {bottomParty.name.slice(0,16)}
+      {bottomParty.name.slice(0,20)} 
+      {bottomParty.name.length > 20 ? '...' : ''}
+
     </div>
 
     <div style={{ paddingRight: '8px' }}>

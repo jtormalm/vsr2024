@@ -18,6 +18,7 @@ export interface Database {
           p1: number | null
           p2: number | null
           round: number
+          start_time: string | null
           winner: Database["public"]["Enums"]["winner"]
         }
         Insert: {
@@ -28,6 +29,7 @@ export interface Database {
           p1?: number | null
           p2?: number | null
           round: number
+          start_time?: string | null
           winner?: Database["public"]["Enums"]["winner"]
         }
         Update: {
@@ -38,6 +40,7 @@ export interface Database {
           p1?: number | null
           p2?: number | null
           round?: number
+          start_time?: string | null
           winner?: Database["public"]["Enums"]["winner"]
         }
         Relationships: [
@@ -70,18 +73,21 @@ export interface Database {
           created_at: string
           id: number
           name: string | null
+          start_time: string | null
         }
         Insert: {
           best_time?: number | null
           created_at?: string
           id?: number
           name?: string | null
+          start_time?: string | null
         }
         Update: {
           best_time?: number | null
           created_at?: string
           id?: number
           name?: string | null
+          start_time?: string | null
         }
         Relationships: []
       }

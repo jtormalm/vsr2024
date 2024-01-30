@@ -22,7 +22,7 @@
 		loaded = true;
 	});
 
-	let selected = 'vsr';
+	let selected: 'vsr' | 'kvalet' = 'vsr';
 
 	let textHeight = 0;
 	let radioHeight = 0;
@@ -33,13 +33,81 @@
 		return player ? player.name : null;
 	};
 
-	const result = data.matches.map((match) => ({
+	const deepEqual = (object1, object2) => {
+		if (object1 === object2) {
+			return true;
+		}
+
+		if (
+			object1 === null ||
+			typeof object1 !== 'object' ||
+			object2 === null ||
+			typeof object2 !== 'object'
+		) {
+			return false;
+		}
+
+		const keys1 = Object.keys(object1);
+		const keys2 = Object.keys(object2);
+
+		if (keys1.length !== keys2.length) {
+			return false;
+		}
+
+		for (const key of keys1) {
+			if (!keys2.includes(key) || !deepEqual(object1[key], object2[key])) {
+				return false;
+			}
+		}
+
+		return true;
+	};
+
+	data.supabase
+		.channel('player')
+		.on(
+			'postgres_changes',
+			{
+				event: '*',
+				schema: 'public'
+			},
+			async (payload) => {
+				if (payload.eventType != 'UPDATE') return;
+
+				const { data: players } = await data.supabase.from('player').select('*');
+
+				if (deepEqual(players, data.players)) return;
+				data.players = players ?? [];
+			}
+		)
+		.subscribe();
+
+	// do the same but for matches
+
+	data.supabase
+		.channel('match')
+		.on(
+			'postgres_changes',
+			{
+				event: '*',
+				schema: 'public'
+			},
+			async (payload) => {
+				const { data: matches } = await data.supabase.from('match').select('*');
+
+				if (deepEqual(matches, data.matches)) return;
+				data.matches = matches ?? [];
+			}
+		)
+		.subscribe();
+
+	$: result = data.matches.map((match) => ({
 		id: match.id,
 		name: match.name,
 		nextMatchId: match.next_match_id,
 		nextLooserMatchId: null, // Assuming there's no direct mapping for this
 		tournamentRoundText: match.round.toString(),
-		startTime: match.created_at,
+		startTime: match.start_time,
 		state: match.winner === 'NONE' ? 'SCHEDULED' : 'FINISHED',
 		participants: [
 			match.p1 !== null
@@ -64,73 +132,11 @@
 	}));
 
 	let container: HTMLDivElement;
-
-	const handleMatchClick = async (event) => {
-		console.log(event.detail.matchId);
-		// await setWinner(event.detail.matchId, event.detail.winnerId);
-	};
-
-	const getUser = (userId: number) => {
-		return data.players.find((p) => p.id === userId);
-	};
-
-	const getMatch = (matchId: number) => {
-		return data.matches.find((m) => m.id === matchId);
-	};
-
-	const printError = (error: any) => {
-		console.error(error);
-		const t: ToastSettings = {
-			message: error.message + ' Kontakta oss',
-			background: 'variant-filled-warning'
-		};
-		toastStore.trigger(t);
-	};
-
-	const setWinner = async (matchId: number, winnerId: number) => {
-		const match = getMatch(matchId);
-		if (!match) return;
-		const winner = match.p1 === winnerId ? 'P1' : 'P2';
-
-		const { error } = await data.supabase.from('match').update({ winner }).eq('id', matchId);
-
-		if (error) {
-			printError(error);
-			return;
-		}
-
-		match.winner = winner;
-
-		const otherMatch = data.matches.find(
-			(m) => m.next_match_id === match.next_match_id && m.id !== match.id
-		);
-		const nextMatch = data.matches.find((m) => m.id === match.next_match_id);
-
-		if (otherMatch && nextMatch) {
-			const otherWinner = otherMatch.id > match.id ? 'P1' : 'P2';
-			const { error } = await data.supabase
-				.from('match')
-				.update({ [otherWinner.toLowerCase()]: winnerId })
-				.eq('id', nextMatch.id);
-			if (error) {
-				printError(error);
-				return;
-			} else {
-				nextMatch[otherWinner.toLowerCase()] = winnerId;
-			}
-		}
-
-		const t = {
-			message: 'Vinnare sparad',
-			background: 'variant-filled-primary'
-		};
-		toastStore.trigger(t);
-	};
-
-	onMount(() => {
-		window.addEventListener('matchClick', handleMatchClick);
-	});
 </script>
+
+<svelte:head>
+	<title>Valla Saucer Rennen 2024</title>
+</svelte:head>
 
 <svelte:window bind:innerHeight bind:innerWidth />
 
@@ -190,20 +196,59 @@
 			{/if}
 		</div>
 	{:else}
-		<div class="h-full grid grid-cols-2 mb- sm:grid-cols-4 gap-4 sm:gap-8 overflow-y-scroll">
-			{#each data.players.sort((a, b) => (a.best_time ?? 0) - (b.best_time ?? 0)) as player}
-				<div
-					class="rounded-lg min-w-40 w-full flex flex-col border-2 border-surface-600 brightness-100"
-				>
-					<div class="text-primary-500 p-2 font-bold">
-						{player.name}
-					</div>
-					<hr />
-					<div class="text-surface-300 p-2">
-						{player.best_time}s
-					</div>
-				</div>
-			{/each}
+		<div class="table-container max-w-3xl mb-10 w-full overflow-auto relative">
+			<table class="table table-hover table-fixed">
+				<thead class="sticky top-0">
+					<tr>
+						<th>Namn</th>
+						<th class="text-center w-20 sm:w-auto !px-0">Startar</th>
+						<th class="text-center w-20 sm:w-auto !px-0">Bästa</th>
+					</tr>
+				</thead>
+				<tbody>
+					{#each data.players.sort((a, b) => {
+						// Handle best_time sorting, treat undefined as Infinity
+						const timeA = a.best_time ?? Infinity;
+						const timeB = b.best_time ?? Infinity;
+
+						// Players who have played
+						if (timeA > 0 && timeB > 0) {
+							return timeA - timeB; // Sort by best_time
+						}
+
+						// Players who have not played
+						if (timeA === 0 && timeB === 0) {
+							// Set a large number for null start_time to push players to the end
+							const maxTime = 24 * 60; // e.g., 24 hours converted to minutes
+
+							// Convert start_time to comparable format (e.g., 'HH:MM' to minutes) or set to maxTime if null
+							const startTimeA = a.start_time ? parseInt(a.start_time.split(':')[0]) * 60 + parseInt(a.start_time.split(':')[1]) : maxTime;
+							const startTimeB = b.start_time ? parseInt(b.start_time.split(':')[0]) * 60 + parseInt(b.start_time.split(':')[1]) : maxTime;
+
+							return startTimeA - startTimeB;
+						}
+
+						// Push players who haven't played to the end
+						return timeA === 0 ? 1 : -1;
+					}) as player}
+						<tr>
+							<td class="overflow-x-hidden text-ellipsis">{player.name}</td>
+							<td class="text-center sm:w-auto !px-0"
+								>{player.start_time == '' || player.start_time == null
+									? '-'
+									: player.start_time}</td
+							>
+							<td class="text-center sm:w-auto !px-0 font-medium text-black">
+								<span class="badge variant-filled-primary text-sm">
+									{player.best_time == 0 || player.best_time == null
+										? `-`
+										: `${player.best_time.toString().slice(0, 4)}s`}
+								</span>
+							</td>
+						</tr>
+					{/each}
+				</tbody>
+			</table>
 		</div>
 	{/if}
 </div>

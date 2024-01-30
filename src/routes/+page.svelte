@@ -198,10 +198,3 @@
 	</div>
 </div>
 <div class="h-[500px] sm:h-[1000px] flex justify-center"></div>
-
-<style>
-	.translateNone {
-		transform: translate3d(0, 0, 0);
-		-webkit-transform: translate3d(0, 0, 0);
-	}
-</style>
