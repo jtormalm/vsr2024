@@ -123,6 +123,10 @@ export const VSRViewer: React.FC<VSRViewerProps> = ({ matches, width, height }) 
           style={{
             marginBottom: '2px',
             marginLeft: '2px',
+
+            // if either top or bottom won then set text to #676767
+
+            color: topWon || bottomWon ? '#676767' : '#ffffff',
           }}
           >
 
