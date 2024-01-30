@@ -417,7 +417,7 @@
 			class="btn m-4 mt-0 variant-filled-primary"
 			type="button">Skapa första rundan i VSR</button
 		>
-		<div class="h-full grid grid-cols-2 mb- sm:grid-cols-4 gap-4 sm:gap-8 overflow-y-scroll">
+		<div class="h-full grid grid-cols-1 sm:grid-cols-4 gap-4 sm:gap-8 overflow-y-scroll">
 			{#each data.players.sort((a, b) => a.id - b.id) as player}
 				<div class="rounded-lg w-full flex flex-col border-2 border-surface-600 p-2 gap-2">
 					<!-- <div class="text-primary-500 p-2 font-bold">
