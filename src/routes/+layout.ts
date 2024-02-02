@@ -3,6 +3,15 @@ import { PUBLIC_SUPABASE_ANON_KEY, PUBLIC_SUPABASE_URL } from '$env/static/publi
 import { createSupabaseLoadClient } from '@supabase/auth-helpers-sveltekit'
 import type { Database } from '$lib/types/supabase'
 
+import { injectSpeedInsights } from '@vercel/speed-insights/sveltekit';
+import { dev } from '$app/environment';
+import { inject } from '@vercel/analytics';
+ 
+
+injectSpeedInsights();
+inject({ mode: dev ? 'development' : 'production' });
+
+
 export const load = async ({ fetch, data, depends }) => {
   depends('supabase:auth')
 
