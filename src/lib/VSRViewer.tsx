@@ -1,5 +1,5 @@
 import React from 'react';
-import { SingleEliminationBracket, Match, createTheme    } from '@g-loot/react-tournament-brackets';
+import { SingleEliminationBracket, createTheme    } from '@g-loot/react-tournament-brackets';
 import SvgViewer  from './SVGViewer';
 
 const vsrTheme = createTheme({
@@ -35,33 +35,16 @@ const vsrTheme = createTheme({
   svgBackground: '#131313', // color_surface_500
 });
 
-// const event = new CustomEvent('yourCustomEvent', {
-//   detail: {
-//     test: 'test',
-//   }
-// });
-
-
 
 interface VSRViewerProps {
   matches: unknown[];
   width: number;
   height: number;
+  callback: (x: number, y: number) => void;
+  startAt?: [number, number];
 }
 
-export const VSRViewer: React.FC<VSRViewerProps> = ({ matches, width, height }) => {
-
-  const emitPartyClick = (playerId: number, matchId: number) => {
-    const event = new CustomEvent('partyClick', {
-      detail: {
-        partyId: playerId,
-        matchId,
-      }
-    });
-    window.dispatchEvent(event);
-  }
-
-
+export const VSRViewer: React.FC<VSRViewerProps> = ({ matches, width, height, callback }) => {
   return (
     <SingleEliminationBracket
       matches={matches}
@@ -92,9 +75,11 @@ export const VSRViewer: React.FC<VSRViewerProps> = ({ matches, width, height }) 
         background={vsrTheme.svgBackground}
         customMiniature={() => null}
         SVGBackground={vsrTheme.svgBackground}
-          width={width}
-          height={height}
-          {...props}
+        width={width}
+        height={height}
+        {...props}
+        startAt={[-815, 1000]}
+        callback={callback}
         >
           {children}
         </SvgViewer>

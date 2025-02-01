@@ -16,7 +16,7 @@
 
 {#if $modalStore[0]}
 	<div class="modal-example-form {cBase}">
-		<header class={cHeader}>Biljettsläpp - 31.1.2024</header>
+		<header class={cHeader}>Biljettsläpp - 4.2.2025</header>
 		<article>Biljetsläppet sker på Orbi på Tisdag</article>
 		<div class="table-container">
 			<!-- Native Table Element -->
@@ -37,7 +37,7 @@
 					<tr>
 						<td>Lördag</td>
 						<td>12:45</td>
-						<td>140kr</td>
+						<td>155kr</td>
 					</tr>
 					<tr>
 						<td>Märke</td>

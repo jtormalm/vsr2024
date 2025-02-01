@@ -7,12 +7,26 @@ const precisionRound = (number: number, precision: number) => {
     return Math.round(number * factor) / factor;
   };
 
-const SvgViewer = ({
+// type it 
+interface SvgViewerProps {
+  height?: number;
+  width?: number;
+  bracketWidth: number;
+  bracketHeight: number;
+  children: React.ReactNode;
+  callback: (x: number, y: number) => void;
+  startAt?: number[];
+  scaleFactor?: number;
+  customToolbar?: () => JSX.Element;
+}
+
+const SvgViewer: React.FC<SvgViewerProps> = ({
   height = 500,
   width = 500,
   bracketWidth,
   bracketHeight,
   children,
+  callback,
   startAt = [0, 0],
   scaleFactor = 1.1,
   customToolbar = null,
@@ -22,11 +36,12 @@ const SvgViewer = ({
   const [tool, setTool] = useState(TOOL_AUTO);
   const [value, setValue] = useState(INITIAL_VALUE);
   const [scaleFactorMin, setScaleFactorMin] = useState(1);
-  const scaleFactorMax = 3;
+  const scaleFactorMax = 4;
 
   useEffect(() => {
     Viewer.current.pan(...startAt);
   }, []);
+
 
   const lockToBoundaries = v => {
     const zoomFactor = v.a || v.d;
@@ -58,7 +73,14 @@ const SvgViewer = ({
       tool={tool}
       onChangeTool={setTool}
       value={value}
-      onChangeValue={setValue}
+      onChangeValue={(e) => {
+
+        setValue(e);
+        callback(
+          e.e,
+          e.f
+        )
+      }}
       onZoom={lockToBoundaries}
       onPan={lockToBoundaries}
       miniatureProps={{ position: 'right' }}

@@ -1,26 +1,41 @@
 export type EventDay = { time: string; text: string }[];
 
+export const first_thursday = [
+    { time: '18:30', text: 'Smygstarta VSR med en grym uppladdning på Cok Najs! Här har du chansen att smaka på årets VSR-öl och delta i ett temaenligt quiz för en chans att vinna förköp!' },
+
+];
+
 export const wednesday: EventDay = [
-    { time: "19:00", text: "Smygstarta helgen med taggpub på Flamman! Här kan du smaka VSR ölen för första gången! Misslyckades du med att få en biljett på biljettsläppet kommer några biljetter och andra priser tävlas ut." },
-    ];
+	{
+		time: '19:00',
+		text: 'Supertrevligt att värma upp inför helgens bravader! Det vankas musikquiz med finfina priser till vinnaren och Gabbe utlovar VSR-öl i mängder!'
+	}
+];
 
-    export const thursday: EventDay = [
-        { time: "08:00", text: "The Red Keep i Baljan - Kaffe och utlottning av biljetter och priser." },
-        { time: "14:00", text: "Torsdagskröken - Öl för studenter från kl 14, med VSR öl i kröken." },
-        { time: "22:00", text: "Türrolleröjet i Kårallen - Forte! spelar, Reyn uppträder kl 00:30. Premiär för VSR-burgare, VSR öl tillgängligt." },
-    ];
-    
+export const thursday: EventDay = [
+	{ time: '08:00 - 14:00', text: 'Baljan blir till flammande Baljan - Under hela dagen kan ni köpa ett VSR-klägg och vara med i utlottningen av ett fint pris i form av en airfryer!' },
+	{ time: '14:00', text: 'Torsdagskröken - KrökenKrew anordnar Torsdagskröken i sann VSR anda med extra god VSR-öl!' },
+	{
+		time: '22:00 - 03:00',
+		text: 'Türrolleröjet i Kårallen - På med ovven/stassen och kom till Kårallen för att se Y-bandet och Svea Skivgarde! På tredje våningen hittar ni en bubbelbar och i grillen silent disco. Ni har även chansen att “Build your own potion” i amfi. Missa inte heller att svänga förbi Gasquen för att smaka årets VSR-burgare som Herman har kokat ihop! '
+	}
+];
 
-    export const friday: EventDay = [
-        { time: "15:00", text: "Fredagspub - Brandon Boys serverar VSR öl och annat gott! Perfekt tillfälle att ta en återställare och ladda om inför kvällens festligheter!" },
-        { time: "22:00", text: "Temakväll på Flamman - Häng med ner i underjorden för att tagga igång ordentligt inför morgondagens bravader!" },
-    ];
-    export const saturday: EventDay = [
-        { time: "10:00", text: "Valla Saucer Rennen 2024 - Start med Lagmarschen kl 9:30. Tävling på snötäckt vallamassiv med hemsnickrade saucrar. Dryck och mat tillgängligt, inklusive Flamman, Xamera, Nira, och Redbull. DJ från Valla Skivgarde. Klä för snö." },
-        { time: "22:00", text: "Efterkälken - Fest i Kårallen för VSR 2024. Y-bandet kl 23:30, Albin Myers kl 01:00. Tredje våningen och Silent Disco i grillen." },
-    ];
-    
-    
+export const friday: EventDay = [
+	{
+		time: '22:00',
+		text: 'Tagga igång ordentligt inför lördagen med temakväll på Flamman!'
+	}
+];
+export const saturday: EventDay = [
+	{
+		time: '10:00',
+		text: 'Valla Saucer Rennen 2025 - Startar med lagmarsch från 09:30. Klockan 10.00 invigs ett snötäckt Vallamassiv och nordens största parallellsaucertävling startar! Högst upp i backen hittar ni Svea Skivgarde. På plats finns även Cok Najs, Nira Dynamics, Swedish Greyhound och Xamera!'
+	},
+	{
+		time: '22:00 - 03:00',
+		text: 'Efterkälken - Bege er till Kårallen för det ultimata slutet på denna helg, Efterkälken! Tungevaag intar scen kl 00:30. Likt torsdagen utlovas även mumsiga burgare och bubbelbar!'
+	}
+];
 
-    
-export const days: EventDay[] = [wednesday, thursday, friday, saturday];
+export const days: EventDay[] = [first_thursday, wednesday, thursday, friday, saturday];

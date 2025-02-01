@@ -132,10 +132,12 @@
 	}));
 
 	let container: HTMLDivElement;
+	let x = 0;
+	let y = 0;
 </script>
 
 <svelte:head>
-	<title>Valla Saucer Rennen 2024</title>
+	<title>Valla Saucer Rennen 2025</title>
 </svelte:head>
 
 <svelte:window bind:innerHeight bind:innerWidth />
@@ -160,7 +162,7 @@
 		bind:clientHeight={textHeight}
 		class="w-full text-center z-20 mt-4 mb-4 text-xl sm:text-2xl font-bold"
 	>
-		Valla Saucer Rennen 2024
+		Valla Saucer Rennen 2025
 	</a>
 	<div class="mb-4" bind:clientHeight={radioHeight}>
 		<RadioGroup class="font-medium">
@@ -176,7 +178,7 @@
 				class="px-8"
 				bind:group={selected}
 				name="justify"
-				value={'vsr'}>VSR 2024</RadioItem
+				value={'vsr'}>VSR 2025</RadioItem
 			>
 		</RadioGroup>
 	</div>
@@ -192,6 +194,12 @@
 					matches={result}
 					width={innerWidth}
 					height={innerHeight - radioHeight - textHeight - 48 - 32}
+					startAt={[y, x]}
+					callback={(x, y) => {
+						console.log(x, y);
+						x = x;
+						y = y;
+					}}
 				/>
 			{/if}
 		</div>

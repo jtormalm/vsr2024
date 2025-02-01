@@ -1,106 +1,150 @@
 <script lang="ts">
-	import Countdown from '$lib/Countdown.svelte';
-	import SaucerBackground from '$lib/SaucerBackground.svelte';
-	import { ProgressBar, type ModalSettings } from '@skeletonlabs/skeleton';
+	import { VSRViewer } from '$lib/VSRViewer.tsx';
+
+	import { matches } from '$lib/matches';
+	import { RadioGroup, RadioItem, type ToastSettings } from '@skeletonlabs/skeleton';
 	import { onDestroy, onMount } from 'svelte';
-	import { fade } from 'svelte/transition';
 
-	import { days } from '$lib/Days';
+	import { getToastStore } from '@skeletonlabs/skeleton';
+	const toastStore = getToastStore();
 
-	import { getModalStore } from '@skeletonlabs/skeleton';
-	import { cubicInOut } from 'svelte/easing';
-	// import { Copyright } from 'lucide-svelte';
+	export let data;
 
-	const modalStore = getModalStore();
-
-	let scrollY: number = 0;
-	let innerWidth: number;
 	let innerHeight: number;
+	let innerWidth: number;
+
+	let clientHeight: number;
+	let clientWidth: number;
+
 	let loaded = false;
 
-	let targetDate = new Date('2024-02-03T10:00:00');
-
-	const textSizeBase = 180;
-	let initialScale = 1;
 	onMount(() => {
 		loaded = true;
 	});
 
-	$: {
-		if (loaded) {
-			initialScale = 0.75 * (innerWidth / textSizeBase);
+	let selected: 'vsr' | 'kvalet' = 'vsr';
+
+	let textHeight = 0;
+	let radioHeight = 0;
+
+	const getPlayerNameById = (id: number | null): string | null => {
+		if (id === null) return null;
+		const player = data.players.find((player) => player.id === id);
+		return player ? player.name : null;
+	};
+
+	const deepEqual = (object1, object2) => {
+		if (object1 === object2) {
+			return true;
 		}
-	}
 
-	let clock: HTMLDivElement;
-	let clockOpacity = 0;
-
-	$: {
-		scrollY;
-		if (clock) {
-			let clockWidth = clock.getBoundingClientRect().width;
-			clockOpacity = clockWidth / (innerWidth * 0.5);
+		if (
+			object1 === null ||
+			typeof object1 !== 'object' ||
+			object2 === null ||
+			typeof object2 !== 'object'
+		) {
+			return false;
 		}
-	}
 
-	const calculateDaysLeft = (targetDate: Date): number => {
-		const now = new Date();
-		const difference = targetDate.getTime() - now.getTime();
-		const days = Math.ceil(difference / (1000 * 3600 * 24));
-		return days;
+		const keys1 = Object.keys(object1);
+		const keys2 = Object.keys(object2);
+
+		if (keys1.length !== keys2.length) {
+			return false;
+		}
+
+		for (const key of keys1) {
+			if (!keys2.includes(key) || !deepEqual(object1[key], object2[key])) {
+				return false;
+			}
+		}
+
+		return true;
 	};
 
-	let daysLeft = calculateDaysLeft(targetDate);
-
-	const openTicketModal = () => {
-		const modal: ModalSettings = {
-			type: 'component',
-			component: 'tisdag'
-		};
-		modalStore.trigger(modal);
-	};
-
-	const dayTitles = {
-		0: 'Taggpub på Flamman',
-		1: 'Türrolleröjet på Kårallen',
-		2: 'Temakväll på Flamman',
-		3: 'Valla Saucer Rennen 2024'
-	};
-
-	const openDayModal = (day: 0 | 1 | 2 | 3) => {
-		const dayData = days[day];
-		const modal: ModalSettings = {
-			type: 'component',
-			component: 'day',
-			meta: {
-				events: dayData
+	data.supabase
+		.channel('player')
+		.on(
+			'postgres_changes',
+			{
+				event: '*',
+				schema: 'public'
 			},
-			title: dayTitles[day]
-		};
-		modalStore.trigger(modal);
-	};
+			async (payload) => {
+				if (payload.eventType != 'UPDATE') return;
+
+				const { data: players } = await data.supabase.from('player').select('*');
+
+				if (deepEqual(players, data.players)) return;
+				data.players = players ?? [];
+			}
+		)
+		.subscribe();
+
+	// do the same but for matches
+
+	data.supabase
+		.channel('match')
+		.on(
+			'postgres_changes',
+			{
+				event: '*',
+				schema: 'public'
+			},
+			async (payload) => {
+				const { data: matches } = await data.supabase.from('match').select('*');
+
+				if (deepEqual(matches, data.matches)) return;
+				data.matches = matches ?? [];
+			}
+		)
+		.subscribe();
+
+	$: result = data.matches.map((match) => ({
+		id: match.id,
+		name: match.name,
+		nextMatchId: match.next_match_id,
+		nextLooserMatchId: null, // Assuming there's no direct mapping for this
+		tournamentRoundText: match.round.toString(),
+		startTime: match.start_time,
+		state: match.winner === 'NONE' ? 'SCHEDULED' : 'FINISHED',
+		participants: [
+			match.p1 !== null
+				? {
+						id: match.p1.toString(),
+						resultText: match.winner !== 'NONE' ? (match.winner === 'P1' ? 'W' : 'L') : null,
+						isWinner: match.winner === 'P1',
+						status: null,
+						name: getPlayerNameById(match.p1)
+					}
+				: null,
+			match.p2 !== null
+				? {
+						id: match.p2.toString(),
+						resultText: match.winner !== 'NONE' ? (match.winner === 'P2' ? 'W' : 'L') : null,
+						isWinner: match.winner === 'P2',
+						status: null,
+						name: getPlayerNameById(match.p2)
+					}
+				: null
+		].filter((participant) => participant !== null) // Filter out null participants
+	}));
+
+	let container: HTMLDivElement;
+	let x = 0;
+	let y = 0;
 </script>
 
-<!-- set the page title to Valla Saucer Rennen 2024 -->
 <svelte:head>
-	<title>Valla Saucer Rennen 2024</title>
+	<title>Valla Saucer Rennen 2025</title>
 </svelte:head>
 
-<svelte:window bind:scrollY bind:innerWidth bind:innerHeight />
-
-<SaucerBackground />
+<svelte:window bind:innerHeight bind:innerWidth />
 
 <div
-	class="fixed flex flex-col items-center font-medium text-sm sm:text-base bottom-4 w-full text-center"
+	class="fixed z-50 flex flex-col items-center font-medium text-sm sm:text-base bottom-0 w-full text-center bg-surface-900"
 >
-	{#if scrollY < 1500}
-		<span
-			class="animate-pulse text-xl font-bold"
-			transition:fade={{ easing: cubicInOut, duration: 150 }}
-		>
-			Skrolla ner
-		</span>
-	{/if}
 	<span class="flex gap-1 items-center">
 		<!-- <Copyright class="w-4" />  -->
 
@@ -109,92 +153,110 @@
 	</span>
 </div>
 
-<div class="fixed w-full items-center gap-4 flex top-4 left-4">
-	{Math.min(Math.max(Math.round((scrollY * 100) / 550), 0), 1000)}
-	{#key scrollY}
-		<ProgressBar class="w-full" label="Progress Bar" value={Math.max(0, scrollY)} max={5400} />
-	{/key}
-	<div class="mr-6">1000</div>
-</div>
-
-{#if scrollY < 3000 && loaded}
-	<div class="fixed inset-0 overflow-hidden">
-		<div class="absolute top-1/2 left-1/2">
-			<div
-				style="transform: translate(-50%, -50%) scale({2 ** ((scrollY - 500) / 200) +
-					initialScale -
-					1}); 
-                filter: brightness({Math.min(100, 40 + 0.12 * scrollY)}%);"
-				class="transform-gpu select-none text-center font-bold"
+<div
+	bind:this={container}
+	class="flex sm:p-4 p-2 w-full text-white flex-col justify-center items-center"
+>
+	<a
+		href="/"
+		bind:clientHeight={textHeight}
+		class="w-full text-center z-20 mt-4 mb-4 text-xl sm:text-2xl font-bold"
+	>
+		Valla Saucer Rennen 2025
+	</a>
+	<div class="mb-4" bind:clientHeight={radioHeight}>
+		<RadioGroup class="font-medium">
+			<RadioItem
+				active="text-black bg-primary-400"
+				class="px-8"
+				bind:group={selected}
+				name="justify"
+				value={'kvalet'}>Kvalet</RadioItem
 			>
-				Valla Saucer Rennen
-			</div>
-		</div>
-	</div>
-{/if}
-
-{#if scrollY >= 2000 && scrollY < 5000}
-	<div class="fixed z-10 inset-0 overflow-hidden">
-		<div class="absolute top-1/2 left-1/2">
-			<div
-				bind:this={clock}
-				style="transform: translate(-50%, -50%) scale({2 ** ((scrollY - 2500) / 300)});
-                   transform-origin: center;
-                  ;
-                   "
-				class="transform-gpu select-none stroke-white text-center font-bold"
+			<RadioItem
+				active="text-black bg-primary-400"
+				class="px-8"
+				bind:group={selected}
+				name="justify"
+				value={'vsr'}>VSR 2025</RadioItem
 			>
-				<div style="opacity: {Math.min(0.5, clockOpacity)};" class="-mb-2">1-3.2.2024</div>
-				<div style="opacity: {clockOpacity};">
-					<Countdown {targetDate} precision={5} />
-				</div>
-			</div>
+		</RadioGroup>
+	</div>
+
+	{#if selected === 'vsr'}
+		<div
+			class="rounded-xl h-full w-full items-center flex justify-center"
+			bind:clientHeight
+			bind:clientWidth
+		>
+			{#if loaded}
+				<react:VSRViewer
+					matches={result}
+					width={innerWidth}
+					height={innerHeight - radioHeight - textHeight - 48 - 32}
+					startAt={[y, x]}
+					callback={(x, y) => {
+						console.log(x, y);
+						x = x;
+						y = y;
+					}}
+				/>
+			{/if}
 		</div>
-	</div>
-{/if}
+	{:else}
+		<div class="table-container max-w-3xl mb-10 w-full overflow-auto relative">
+			<table class="table table-hover table-fixed">
+				<thead class="sticky top-0">
+					<tr>
+						<th>Namn</th>
+						<th class="text-center w-20 sm:w-auto !px-0">Startar</th>
+						<th class="text-center w-20 sm:w-auto !px-0">Bästa</th>
+					</tr>
+				</thead>
+				<tbody>
+					{#each data.players.sort((a, b) => {
+						// Handle best_time sorting, treat undefined as Infinity
+						const timeA = a.best_time ?? Infinity;
+						const timeB = b.best_time ?? Infinity;
 
-<div class="h-[5400px] flex justify-center"></div>
+						// Players who have played
+						if (timeA > 0 && timeB > 0) {
+							return timeA - timeB; // Sort by best_time
+						}
 
-<div class="flex flex-col gap-4 items-center w-full justify-center sticky top-12 sm:top-12">
-	<div class="grid grid-cols-3 place-items-center items-center gap-4 sm:gap-8 px-2 sm:w-1/2">
-		<img src="/images/nira.svg" alt="Ericsson" />
-		<img src="/images/korallen.svg" alt="Ericsson" />
-		<img src="/images/coknajs.svg" alt="Microtec" />
-	</div>
-	<div class="px-2 sm:w-1/2 text-center font-medium text-2xl sm:text-3xl">
-		Norra Europas Största <br /> Parallel Saucer Race <br />
-		<span class="font-bold"> {daysLeft} dagar kvar </span>
-	</div>
-	<div class="grid grid-cols-2 gap-4 w-full px-2 sm:px-0 font-bold sm:w-1/2">
-		<button on:click={openTicketModal} class="btn w-full variant-outline-primary" type="button"
-			>Biljettsläpp</button
-		>
-		<button
-			on:click={() => openDayModal(0)}
-			class="btn w-full variant-outline-primary"
-			type="button">Onsdag</button
-		>
-		<button
-			on:click={() => openDayModal(1)}
-			class="btn w-full variant-outline-primary"
-			type="button">Torsdag</button
-		>
-		<button
-			on:click={() => openDayModal(2)}
-			class="btn w-full variant-outline-primary"
-			type="button">Fredag</button
-		>
-		<button
-			on:click={() => openDayModal(3)}
-			class="btn w-full variant-outline-primary"
-			type="button">Lördag</button
-		>
-		<a href="/tavling" class="btn variant-filled-primary text-center w-full font-bold"
-			>Öppna Tävling</a
-		>
-	</div>
-	<div class="flex justify-center w-40">
-		<img class="" src="/images/y6.png" alt="YSex Logo" />
-	</div>
+						// Players who have not played
+						if (timeA === 0 && timeB === 0) {
+							// Set a large number for null start_time to push players to the end
+							const maxTime = 24 * 60; // e.g., 24 hours converted to minutes
+
+							// Convert start_time to comparable format (e.g., 'HH:MM' to minutes) or set to maxTime if null
+							const startTimeA = a.start_time ? parseInt(a.start_time.split(':')[0]) * 60 + parseInt(a.start_time.split(':')[1]) : maxTime;
+							const startTimeB = b.start_time ? parseInt(b.start_time.split(':')[0]) * 60 + parseInt(b.start_time.split(':')[1]) : maxTime;
+
+							return startTimeA - startTimeB;
+						}
+
+						// Push players who haven't played to the end
+						return timeA === 0 ? 1 : -1;
+					}) as player}
+						<tr>
+							<td class="overflow-x-hidden text-ellipsis">{player.name}</td>
+							<td class="text-center sm:w-auto !px-0"
+								>{player.start_time == '' || player.start_time == null
+									? '-'
+									: player.start_time}</td
+							>
+							<td class="text-center sm:w-auto !px-0 font-medium text-black">
+								<span class="badge variant-filled-primary text-sm">
+									{player.best_time == 0 || player.best_time == null
+										? `-`
+										: `${player.best_time.toString().slice(0, 4)}s`}
+								</span>
+							</td>
+						</tr>
+					{/each}
+				</tbody>
+			</table>
+		</div>
+	{/if}
 </div>
-<div class="h-[500px] sm:h-[1000px] flex justify-center"></div>

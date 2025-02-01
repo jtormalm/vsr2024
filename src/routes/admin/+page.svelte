@@ -338,7 +338,7 @@
 				class="px-8"
 				bind:group={selected}
 				name="justify"
-				value={'vsr'}>VSR 2024</RadioItem
+				value={'vsr'}>VSR 2025</RadioItem
 			>
 		</RadioGroup>
 	</div>

@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { onDestroy, onMount } from 'svelte';
 
-	const MIN_SPEED = 0.3;
-	const MAX_SPEED = 0.5;
+	const MIN_SPEED = 0.4;
+	const MAX_SPEED = 0.6;
 
 	const MIN_SIZE = 30;
 	const MAX_SIZE = 45;
