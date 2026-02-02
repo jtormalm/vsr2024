@@ -196,7 +196,7 @@
 					height={innerHeight - radioHeight - textHeight - 48 - 32}
 					startAt={[y, x]}
 					callback={(x, y) => {
-						console.log(x, y);
+						// console.log(x, y);
 						x = x;
 						y = y;
 					}}

@@ -6,14 +6,14 @@
 	let { supabase } = data;
 	$: ({ supabase } = data);
 
-	$: console.log(data);
+	// $: console.log(data);
 
 	let wrongPassword = false;
 	let password = '';
 	let loginSuccess = false;
 
 	const signIn = async () => {
-		console.log('signing in');
+		// console.log('signing in');
 		const { data, error } = await supabase.auth.signInWithPassword({
 			email: 'admin@ysex.se',
 			password

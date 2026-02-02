@@ -17,7 +17,7 @@
 	let selected: 'kvalet' | 'vsr' = 'vsr';
 	let selectedMatch = 1;
 
-	$: console.log(data);
+	// $: console.log(data);
 
 	const submitChanges = async (player: (typeof data.players)[number]) => {
 		if (requestActive) return;
